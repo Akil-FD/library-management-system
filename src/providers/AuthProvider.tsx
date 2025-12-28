@@ -1,34 +1,63 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState, useCallback, useMemo } from "react"
 import { AuthContext } from "@/context/AuthContext"
-import { User } from "@/types/auth"
+import { AuthUser, User } from "@/types/auth"
+
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
+    const [user, setUser] = useState<AuthUser | null>(null)
+    const [isLoading, setIsLoading] = useState(true)
 
-  const login = (userData: User) => {
-    setUser(userData);
-    localStorage.setItem("user", JSON.stringify(userData));
-  }
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user")
+        const token = localStorage.getItem("token")
 
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem("user");
-  }
+        if (storedUser && token) {
+            setUser({
+                ...JSON.parse(storedUser),
+                token,
+            })
+        }
 
-  return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated: !!user,
-        login,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  )
+        setIsLoading(false)
+    }, [])
+
+    const login = useCallback((userData: User, token?: string) => {
+        const authUser = { ...userData, token: token || "" }
+
+        setUser(authUser);
+
+        localStorage.setItem("user", JSON.stringify(userData));
+        if (token) {
+            localStorage.setItem("token", token);
+        }else{
+            localStorage.removeItem("token");
+        }
+    }, [])
+
+    const logout = useCallback(() => {
+        setUser(null)
+        localStorage.removeItem("user")
+        localStorage.removeItem("token")
+    }, [])
+
+    const { token, ...userInfo } = user || { token: "" };
+
+    const value = useMemo(
+        () => ({
+            user: userInfo ? userInfo as User : null,
+            isAuthenticated: !!user,
+            isLoading,
+            login,
+            logout,
+        }),
+        [user, isLoading, login, logout]
+    )
+
+    return (
+        <AuthContext.Provider value={value}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
-
-

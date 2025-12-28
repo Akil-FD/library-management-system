@@ -8,6 +8,6 @@ export const CONFIG = {
 
 export const APP_ROUTES = {
   HOME: '/',
-  LOGIN: '/login',
+  LOGIN: '/auth/login',
   DASHBOARD: '/dashboard',
 } as const
