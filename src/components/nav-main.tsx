@@ -1,7 +1,7 @@
 "use client"
 
 import { type Icon } from "@tabler/icons-react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 import {
   SidebarGroup,
@@ -21,6 +21,7 @@ export function NavMain({
   }[]
 }) {
   const pathname = usePathname()
+  const router = useRouter()
 
   return (
     <SidebarGroup>
@@ -28,7 +29,11 @@ export function NavMain({
         <SidebarMenu>
           {items.map((item) => (
             <SidebarMenuItem key={item.title}>
-              <SidebarMenuButton tooltip={item.title} isActive={pathname === item.url}>
+              <SidebarMenuButton
+                tooltip={item.title}
+                isActive={pathname === item.url}
+                onClick={() => router.push(item.url)}
+              >
                 {item.icon && <item.icon />}
                 <span>{item.title}</span>
               </SidebarMenuButton>

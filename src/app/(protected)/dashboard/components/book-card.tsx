@@ -1,15 +1,34 @@
 import { showErrorToast } from "@/components/common/toast";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { DEFAULT_VALUES } from "@/constants/app";
+import { DEFAULT_VALUES, MENU_ITEMS } from "@/constants/app";
 import { useAuth } from "@/hooks/useAuth";
 import { BorrowedBook } from "@/types/dashboard";
 import Image from "next/image";
-import { useCallback, useState } from "react";
+import { usePathname } from "next/navigation";
+import { useCallback, useMemo, useState } from "react";
 
-export default function BookCard({ book, onBorrow }: { book: BorrowedBook, onBorrow?: (details: BorrowedBook) => void }) {
+
+interface BookCardProps {
+    book: BorrowedBook;
+    onBorrow?: (details: BorrowedBook) => void;
+    onReturn?: (details: BorrowedBook) => void;
+}
+
+
+export default function BookCard({ book, onBorrow, onReturn }: BookCardProps) {
     const [imgError, setImgError] = useState(false);
     const { borrowedBooks } = useAuth();
+    const pathname = usePathname();
+
+    const memoized = useMemo(() => {
+        return {
+            isMyBooksPage: pathname === MENU_ITEMS[1]?.url,
+            isBooksPage: pathname === MENU_ITEMS[0]?.url,
+        };
+    }, [pathname]);
+
     const handleBorrow = useCallback(() => {
         if (onBorrow && (book.isBorrowed || book.inStock > 0) && borrowedBooks.length < DEFAULT_VALUES.BORROW_BOOKS_LIMIT) {
             onBorrow(book);
@@ -22,84 +41,133 @@ export default function BookCard({ book, onBorrow }: { book: BorrowedBook, onBor
     }, [onBorrow, book, borrowedBooks]);
 
     return (
-        <div
-            className="flex justify-center"
+        <Card
+            className="
+               flex flex-col sm:flex-row
+               w-full
+               rounded-xl
+               bg-white
+               p-4 sm:p-5
+               shadow-[0_8px_24px_rgba(0,0,0,0.08)]
+               hover:shadow-[0_12px_32px_rgba(0,0,0,0.12)]
+               transition-all
+             "
         >
-            <div className="w-full max-w-[520px]">
-                <Card
-                    className="group flex w-full flex-col sm:flex-row items-stretch gap-5
-                        rounded-2xl border border-border
-                        bg-card/80
-                        px-6 py-5
-                        shadow-sm
-                        transition-all duration-300
-                        hover:-translate-y-1 hover:border-primary/40 hover:shadow-lg
-                    "
-                >
 
-                    <div className="relative h-70 w-50 sm:h-40 sm:w-28 flex-shrink-0 overflow-hidden rounded-xl bg-muted m-auto sm:m-0">
-                        <Image
-                            src={imgError ? "/library-management.jpg" : book.cover}
-                            alt={book.title}
-                            fill
-                            sizes="128px"
-                            onError={() => setImgError(true)}
-                            className="object-cover object-center transition-transform duration-500 group-hover:scale-105"
-                        />
-                    </div>
-
-                    <div className="flex flex-1 flex-col justify-between gap-4 ml-0 sm:ml-2">
-
-                        <div className="space-y-1">
-                            <CardTitle className="text-lg font-semibold tracking-tight line-clamp-2">
-                                {book.title}
-                            </CardTitle>
-
-                            <CardDescription className="text-sm text-muted-foreground line-clamp-1">
-                                • {book.author}
-                            </CardDescription>
-
-                            <CardDescription className="text-sm text-muted-foreground line-clamp-1">
-                                Published Year : {book.year}
-                            </CardDescription>
-                        </div>
-
-                        <div className="flex flex-wrap items-center justify-between gap-4">
-                            <span
-                                className={`
-                                    inline-flex items-center gap-2 rounded-full
-                                    px-3 py-1.5 text-xs font-semibold min-w-fit
-                                    ${book.inStock > 0
-                                        ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                                        : "bg-destructive/10 text-destructive"
-                                    }
-                                `}
-                            >
-                                <span
-                                    className={`
-                                        h-2.5 w-2.5 rounded-full
-                                        ${book.inStock > 0 ? "bg-emerald-500" : "bg-destructive"
-                                        }
-                                `}
-                                />
-                                {book.inStock > 0 ? `${book.inStock} in stock` : "Out of stock"}
-                            </span>
-
-                            <Button
-                                disabled={book.isBorrowed || book.inStock === 0}
-                                className={`inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-medium transition-all ${book.inStock > 0
-                                    ? "bg-foreground text-background hover:bg-foreground/90"
-                                    : "bg-muted text-muted-foreground cursor-not-allowed"
-                                    }
-                                `}
-                                onClick={handleBorrow}
-                            >
-                                {book.isBorrowed ? 'Already Borrowed' : 'Borrow Book'}
-                            </Button>
-                        </div>
-                    </div>
-                </Card>
+            <div className="mx-auto sm:mx-0 flex-shrink-0">
+                <div className="relative h-44 w-32 sm:h-48 sm:w-36 overflow-hidden rounded-lg bg-muted">
+                    <Image
+                        src={imgError ? DEFAULT_VALUES.BOOKS_PLACEHOLDER_IMAGE : book.cover}
+                        alt={book.title}
+                        fill
+                        sizes="(max-width: 640px) 128px, 144px"
+                        className="object-cover"
+                        onError={() => setImgError(true)}
+                    />
+                </div>
             </div>
-        </div>);
 
-} 
+
+            <div className="flex flex-1 flex-col justify-between mt-4 sm:mt-0 sm:pl-5">
+                <div className="space-y-1 text-center sm:text-left">
+                    <h3 className="text-base font-semibold line-clamp-2">
+                        {book.title}
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground">
+                        {book.author}
+                    </p>
+
+                    {memoized.isMyBooksPage &&
+                        <p className="text-xs text-muted-foreground">
+                            Borrowed on{" "}
+                            <span className="font-medium">
+                                {new Date(book.borrowedDate).toLocaleDateString()}
+                            </span>
+                        </p>
+                    }
+
+                    {memoized.isBooksPage &&
+                        <p className="text-xs text-muted-foreground">
+                            Published Year : {book.year}
+                        </p>
+                    }
+
+                    {memoized.isMyBooksPage && <BarrowedBadge />}
+
+                    {memoized.isBooksPage &&
+                        <Badge
+                            variant={book.inStock <= 0 ? "secondary" : "default"}
+                            className={`mt-2 w-fit mx-auto sm:mx-0 ${book.inStock <= 0 ? "bg-red-100 text-red-700" : "bg-green-100 text-green-700"}`}
+                        >
+                            {book.inStock <= 0 ? "Out of Stock" : `${book.inStock} in Stock`}
+                        </Badge>
+                    }
+                </div>
+
+
+                <div className="mt-4 sm:mt-0 flex">
+                    {memoized.isMyBooksPage &&
+                        <ReturnButton
+                            onClick={() => onReturn?.(book)}
+                        />
+                    }
+
+                    {memoized.isBooksPage &&
+                        <BorrowButton
+                            className={book.inStock > 0
+                                ? "bg-foreground text-background hover:bg-foreground/90"
+                                : "bg-muted text-muted-foreground cursor-not-allowed"
+                            }
+                            name={book.isBorrowed ? 'Already Borrowed' : 'Borrow Book'}
+                            disabled={book.isBorrowed || book.inStock === 0}
+                            onClick={handleBorrow}
+                        />
+                    }
+                </div>
+            </div>
+        </Card>);
+
+}
+
+
+const BarrowedBadge = () => {
+    return (
+        <Badge
+            variant="secondary"
+            className="mt-2 w-fit mx-auto sm:mx-0 bg-indigo-100 text-indigo-700"
+        >
+            Borrowed
+        </Badge>
+    )
+}
+
+const ReturnButton = ({ disabled = false, onClick }: { disabled?: boolean; onClick: () => void }) => {
+    return (
+        <Button
+            variant="outline"
+            className="
+              w-full sm:w-auto sm:ml-auto
+              rounded-lg
+              text-red-600 border-red-600
+              hover:bg-red-600 hover:text-white
+            "
+            onClick={onClick}
+            disabled={disabled}
+        >
+            Return Book
+        </Button>
+    )
+
+}
+
+const BorrowButton = ({ disabled, name, className, onClick }: { disabled?: boolean; name: string, className?: string, onClick: () => void }) => {
+    return <Button
+        disabled={disabled}
+        className={`w-full sm:w-auto sm:ml-auto rounded-lg ${className}`}
+        onClick={onClick}
+    >
+        {name}
+    </Button>
+
+}

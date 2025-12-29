@@ -1,7 +1,7 @@
 
 import { Book } from "@/types/dashboard";
 import { dashboardApi } from "@/api/dashboard/dashboard.api";
-import Dashboard from "@/app/sections/dashboard";
+import Books from "@/app/sections/books";
 
 export default async function Page() {
 
@@ -50,6 +50,6 @@ export default async function Page() {
   const books: Book[] | undefined = await fetchBooks();
 
   return (
-    <Dashboard books={books ?? []} />
+    <Books data={books ?? []} />
   )
 }

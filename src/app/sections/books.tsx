@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { UserRole } from "@/types/enums/auth.enum";
 import EmptyData from "@/components/empty-data";
 
-export default function Dashboard({ books }: { books: Book[] }) {
+export default function Books({ data }: { data: Book[] }) {
     const [booksState, setBooksState] = useState<BorrowedBook[]>([]);
 
     const { user, borrowedBooks, updateBorrowedBooks } = useAuth();
@@ -17,7 +17,7 @@ export default function Dashboard({ books }: { books: Book[] }) {
         if (storeDataBooks && storeDataBooks.length) {
             setBooksState(storeDataBooks ? JSON.parse(storeDataBooks) : []);
         } else {
-            const booksWithBorrowedInfo: BorrowedBook[] = books.map(book => {
+            const booksWithBorrowedInfo: BorrowedBook[] = data.map(book => {
                 const borrowedBook = borrowedBooks.find(borrowedBook => borrowedBook.title === book.title);
                 return {
                     ...book,
@@ -28,7 +28,7 @@ export default function Dashboard({ books }: { books: Book[] }) {
             setBooksState(booksWithBorrowedInfo);
             localStorage.setItem("books", JSON.stringify(booksWithBorrowedInfo));
         }
-    }, [books, borrowedBooks]);
+    }, [data, borrowedBooks]);
 
     const handleBorrow = (bookDetails: BorrowedBook) => {
         const book = booksState.find(b => b.title === bookDetails.title);
