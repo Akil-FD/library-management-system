@@ -24,7 +24,7 @@ export function AuthGuard({ children }: { children: React.ReactNode }) {
         }
 
         if (isAuthenticated && isAuthRoute) {
-            router.replace(APP_ROUTES.DASHBOARD)
+            router.replace(APP_ROUTES.DASHBOARD_BOOKS)
         }
     }, [isAuthenticated, isLoading, isAuthRoute, router])
 

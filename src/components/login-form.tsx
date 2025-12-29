@@ -14,7 +14,7 @@ import {
   FieldGroup,
 } from "@/components/ui/field"
 import { useForm } from "react-hook-form"
-import React, { useContext } from "react"
+import React from "react"
 import { yupResolver } from "@hookform/resolvers/yup"
 import * as yup from "yup"
 import { toast } from "sonner"
@@ -26,11 +26,9 @@ import { UserRole } from "@/types/enums/auth.enum"
 import { CONFIG } from "@/constants/app"
 import { useAuth } from "@/hooks/useAuth"
 
-import dynamic from "next/dynamic"
+import { showSuccessToast } from "./common/toast"
 
-// const FormInput = dynamic(() => import("./common/FormInput"), {
-//   ssr: false,
-// })
+
 const loginSchema = yup.object().shape({
   role: yup.string().required(),
   email: yup.string().email(MESSAGES.INVALID_EMAIL_FORMAT).required(MESSAGES.EMAIL_REQUIRED),
@@ -69,7 +67,7 @@ export function LoginForm({
           const { token, ...userData } = res.data;
           login(userData, token);
         }
-        toast.success(res.success ? MESSAGES.LOGIN_SUCCESS : MESSAGES.LOGIN_FAILED);
+        showSuccessToast(res.success ? MESSAGES.LOGIN_SUCCESS : MESSAGES.LOGIN_FAILED);
       }
     } catch (error) {
       if (process.env.NODE_ENV === CONFIG.DEVELOPMENT)
