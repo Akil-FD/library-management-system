@@ -22,6 +22,7 @@ export const LOCAL_STORAGE_KEYS = {
 
 export const DEFAULT_VALUES = {
   BORROW_BOOKS_LIMIT: 2,
+  BOOKS_PLACEHOLDER_IMAGE: '/library-management.jpg',
 } as const
 
 export const MENU_ITEMS = [

@@ -17,7 +17,7 @@ export const showSuccessToast = (title: string, description?: string) =>
                 }
             </div>
         </div>
-    ))
+    ));
 
 export const showErrorToast = (title: string, description?: string) =>
     toast.custom(() => (
@@ -32,7 +32,7 @@ export const showErrorToast = (title: string, description?: string) =>
                 }
             </div>
         </div>
-    ))
+    ));
 
 export const showWarningToast = (title: string, description?: string) =>
     toast.custom(() => (
@@ -47,4 +47,4 @@ export const showWarningToast = (title: string, description?: string) =>
                 }
             </div>
         </div>
-    ))
+    ));
