@@ -1,11 +1,26 @@
+import { showErrorToast } from "@/components/common/toast";
 import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
-import { Book } from "@/types/dashboard";
+import { DEFAULT_VALUES } from "@/constants/app";
+import { useAuth } from "@/hooks/useAuth";
+import { BorrowedBook } from "@/types/dashboard";
 import Image from "next/image";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
-export default function BookCard({ book, }: { book: Book, }) {
+export default function BookCard({ book, onBorrow }: { book: BorrowedBook, onBorrow?: (details: BorrowedBook) => void }) {
     const [imgError, setImgError] = useState(false);
+    const { borrowedBooks } = useAuth();
+    const handleBorrow = useCallback(() => {
+        if (onBorrow && (book.isBorrowed || book.inStock > 0) && borrowedBooks.length < DEFAULT_VALUES.BORROW_BOOKS_LIMIT) {
+            onBorrow(book);
+        }
+
+        if (borrowedBooks.length >= DEFAULT_VALUES.BORROW_BOOKS_LIMIT) {
+            showErrorToast(`Borrow limit reached (Max ${DEFAULT_VALUES.BORROW_BOOKS_LIMIT} books)`);
+        }
+
+    }, [onBorrow, book, borrowedBooks]);
+
     return (
         <div
             className="flex justify-center"
@@ -71,14 +86,15 @@ export default function BookCard({ book, }: { book: Book, }) {
                             </span>
 
                             <Button
-                                disabled={book.inStock === 0}
+                                disabled={book.isBorrowed || book.inStock === 0}
                                 className={`inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-medium transition-all ${book.inStock > 0
                                     ? "bg-foreground text-background hover:bg-foreground/90"
                                     : "bg-muted text-muted-foreground cursor-not-allowed"
                                     }
                                 `}
+                                onClick={handleBorrow}
                             >
-                                Borrow
+                                {book.isBorrowed ? 'Already Borrowed' : 'Borrow Book'}
                             </Button>
                         </div>
                     </div>

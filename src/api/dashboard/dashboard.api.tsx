@@ -3,7 +3,7 @@ export const dashboardApi = {
     getBooks(): Promise<Response> {
         try {
             return fetch(
-                "https://api.openalex.org/works?filter=title.search:programming&per-page=50",
+                "https://www.googleapis.com/books/v1/volumes?q=programming&maxResults=40",
                 { cache: "no-store" }
             );
         } catch (error) {
@@ -11,16 +11,5 @@ export const dashboardApi = {
         }
 
     },
-
-    getCoverImageByTitle(title: string): Promise<Response> {
-        try {
-            return fetch(
-                `https://openlibrary.org/search.json?title=${encodeURIComponent(title)}&limit=1`,
-                { cache: "no-store" }
-            )
-        } catch (error) {
-            return Promise.reject(error);
-        }
-    }
 
 }

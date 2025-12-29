@@ -19,6 +19,9 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { FieldSeparator } from "./ui/field"
+import InfoCard from "@/app/(protected)/dashboard/components/info-card"
+import { useAuth } from "@/hooks/useAuth"
+import { MENU_ITEMS } from "@/constants/app"
 
 const data = {
   user: {
@@ -28,34 +31,22 @@ const data = {
   },
   navMain: [
     {
-      title: "Books",
-      url: "#",
+      title: MENU_ITEMS[0].title,
+      url: MENU_ITEMS[0].url,
       icon: IconDashboard,
     },
     {
-      title: "My Books",
-      url: "#",
+      title: MENU_ITEMS[1].title,
+      url: MENU_ITEMS[1].url,
       icon: IconListDetails,
     },
-    // {
-    //   title: "Analytics",
-    //   url: "#",
-    //   icon: IconChartBar,
-    // },
-    // {
-    //   title: "Projects",
-    //   url: "#",
-    //   icon: IconFolder,
-    // },
-    // {
-    //   title: "Team",
-    //   url: "#",
-    //   icon: IconUsers,
-    // },
+
   ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { borrowedBooks } = useAuth();
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -80,6 +71,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
+        <InfoCard limit={2} used={borrowedBooks.length} className="mx-2 mb-3 mt-2 py-3" />
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>
