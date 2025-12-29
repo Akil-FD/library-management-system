@@ -1,6 +1,5 @@
 
 import { CommonResType, LoginPayload, LoginResponse } from "@/api/types"
-import { UserRole } from "@/types/enums/auth.enum"
 
 export const authApi = {
     login(data: LoginPayload): Promise<CommonResType<LoginResponse>> {
