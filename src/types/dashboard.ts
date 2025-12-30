@@ -4,9 +4,13 @@ export type Book = {
     cover: string;
     inStock: number;
     year: string | number;
+    isBorrowed: boolean;
 }
 
 export type BorrowedBook = Book & {
-    isBorrowed: boolean;
-    borrowedDate: string;
+    borrowed: {
+        onDate: string;
+        returnedDate: string;
+        name?: string;
+    }
 }

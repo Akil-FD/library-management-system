@@ -11,7 +11,7 @@ export default async function Page() {
   }: {
     volumeId?: string | null
     thumbnail?: string | null
-  }) {
+  }): string | null {
     if (thumbnail) {
       return thumbnail.replace("http://", "https://")
     }
@@ -23,7 +23,7 @@ export default async function Page() {
     return null
   }
 
-  async function fetchBooks() {
+  async function fetchBooks(): Promise<Book[] | undefined> {
     const res = await dashboardApi.getBooks();
 
     const data = await res.json()

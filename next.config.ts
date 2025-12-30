@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'api.openalex.org',
+        hostname: 'books.google.com',
       },
     ],
     unoptimized: true,
