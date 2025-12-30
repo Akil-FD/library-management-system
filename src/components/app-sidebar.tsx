@@ -3,8 +3,8 @@
 import * as React from "react"
 import {
   IconArrowUpRight,
+  IconBook,
   IconDashboard,
-  IconInnerShadowTop,
   IconListDetails,
 } from "@tabler/icons-react"
 
@@ -73,7 +73,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               className="data-[slot=sidebar-menu-button]:!p-1.5"
             >
               <a href="#">
-                <IconInnerShadowTop className="!size-5" />
+               <IconBook className="!size-5" />
                 <span className="text-base font-semibold">Shelf Wise</span>
               </a>
             </SidebarMenuButton>
