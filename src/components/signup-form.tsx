@@ -26,61 +26,34 @@ import { Tabs, TabsList, TabsTrigger } from "./ui/tabs"
 import { UserRole } from "@/types/enums/auth.enum"
 import { APP_ROUTES, CONFIG, LOCAL_STORAGE_KEYS } from "@/constants/app"
 import { useAuth } from "@/hooks/useAuth"
-import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 import { showSuccessToast } from "./common/toast"
 import mockData from "../../mock_data/data.json";
 import { User } from "@/types/auth"
+import Link from "next/link"
 
 
-const loginSchema = yup.object().shape({
+const signupSchema = yup.object().shape({
   role: yup.string().required(),
   email: yup.string().email(MESSAGES.INVALID_EMAIL_FORMAT).required(MESSAGES.EMAIL_REQUIRED),
   password: yup.string().min(6, MESSAGES.PASSWORD_MIN_LENGTH).required(MESSAGES.PASSWORD_REQUIRED),
 })
 
 
-export function LoginForm({
+export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
-  const roleTabOptions = [
-    { label: "User", value: UserRole.USER },
-    { label: "Admin", value: UserRole.ADMIN },
-  ];
 
   const { login } = useAuth();
+  const router = useRouter();
 
-  const { register, handleSubmit, watch, setValue, setError, formState: { errors, isSubmitting } } = useForm({
+  const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm({
     defaultValues: { role: UserRole.USER, email: "", password: "" },
-    resolver: yupResolver(loginSchema),
+    resolver: yupResolver(signupSchema),
     mode: 'onSubmit'
   })
-
-  const formValues = watch();
-
-  useEffect(() => {
-    setEmailIfNotLoggedIn(formValues.role)
-  }, []);
-
-  const onRoleChange = (value: any) => {
-    setEmailIfNotLoggedIn(value)
-    setValue('role', value as UserRole);
-  }
-
-  function setEmailIfNotLoggedIn(role: string) {
-    const storedUsers = JSON.parse(
-      localStorage.getItem(LOCAL_STORAGE_KEYS.LOGGEDIN_USERS) || "[]"
-    )
-
-    if (role !== UserRole.ADMIN && storedUsers.length > 0) return
-
-    const email =
-      mockData[0]?.login?.find(item => item.role === role)?.email ?? ""
-
-    setValue("email", email)
-  }
-
 
   const onSubmit = async (data: {
     role: string
@@ -88,11 +61,11 @@ export function LoginForm({
     password: string
   }) => {
     try {
-      const loggedUsers = getLoggedUsers()
+      const users = getLoggedUsers()
 
-      if (!validateEmailOrSetError(data.email, data.role, loggedUsers)) return
+      if (!validateSignupEmail(data.email, data.role, users)) return
 
-      const res = await loginUser(data)
+      const res = await signupUser(data)
 
       if (!res.success) {
         showSuccessToast(MESSAGES.LOGIN_FAILED)
@@ -101,8 +74,9 @@ export function LoginForm({
 
       const { token, ...userData } = res.data
 
-      saveLoggedUser(userData)
+      saveNewUser(userData)
       login(userData, token)
+      router.push(APP_ROUTES.DASHBOARD)
 
       showSuccessToast(MESSAGES.LOGIN_SUCCESS)
     } catch (error) {
@@ -113,34 +87,30 @@ export function LoginForm({
     }
   }
 
-  async function loginUser(data: {
+  async function signupUser(data: {
     email: string
     password: string
     role: string
   }) {
-    return await authApi.login({
+    return authApi.signup({
       ...data,
       role: data.role as UserRole,
     })
   }
 
-
-  function saveLoggedUser(userData: User) {
+  function saveNewUser(userData: User) {
     const users = getLoggedUsers()
 
-    const uniqueUsers = [
-      ...users.filter(
-        user => !(user.email === userData.email && user.role === userData.role)
-      ),
-      userData,
-    ]
+    const newUser = {
+      ...userData,
+      id: users.length,
+    }
 
     localStorage.setItem(
       LOCAL_STORAGE_KEYS.LOGGEDIN_USERS,
-      JSON.stringify(uniqueUsers.map((user, i) => ({ ...user, id: i })))
+      JSON.stringify([...users, newUser])
     )
   }
-
 
   function getLoggedUsers(): User[] {
     return JSON.parse(
@@ -148,15 +118,16 @@ export function LoginForm({
     )
   }
 
-  function validateEmailOrSetError(
+
+  function validateSignupEmail(
     email: string,
     role: string,
     users: User[]
   ): boolean {
-    const isValid = checkIsEmailValid(email, role, users)
+    const isExists = checkIsEmailValid(email, role, users)
 
-    if (isValid) {
-      setError("email", { message: MESSAGES.EMAIL_NOT_EXIST })
+    if (isExists) {
+      setError("email", { message: MESSAGES.EMAIL_EXIST })
       return false
     }
 
@@ -169,18 +140,16 @@ export function LoginForm({
     role: string,
     parsedLoggedUsers: User[] | null
   ): boolean {
-    const emailSet = new Set<string>([
-      ...mockData[0].login
-        .filter(u => u.role === role)
-        .map(u => u.email),
+    const existingEmailsForRole = [
+      ...mockData[0].login,
+      ...(parsedLoggedUsers ?? []),
+    ]
+      .filter(user => user.role === role)
+      .map(user => user.email.toLowerCase())
 
-      ...(parsedLoggedUsers ?? [])
-        .filter(u => u.role === role)
-        .map(u => u.email),
-    ])
-
-    return !emailSet.has(email)
+    return existingEmailsForRole.includes(email.toLowerCase())
   }
+
 
 
   const handleFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
@@ -209,9 +178,9 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle>Login to your account</CardTitle>
+          <CardTitle>Create an account</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Enter your email below to create your account
           </CardDescription>
         </CardHeader>
 
@@ -219,42 +188,20 @@ export function LoginForm({
           <form noValidate onSubmit={handleFormSubmit}>
             <FieldGroup>
 
-              <Tabs value={formValues.role} onValueChange={onRoleChange}>
-                <TabsList className="w-full">
-                  {
-                    roleTabOptions.map((option) => (
-                      <TabsTrigger key={option.value} value={option.value}>
-                        {option.label}
-                      </TabsTrigger>
-                    ))
-                  }
-                </TabsList>
-              </Tabs>
-
               <FormInput {...inputProps.email} register={register} error={errors.email} />
               <Field>
                 <div className="flex items-center">
                   <FormInput {...inputProps.password} register={register} error={errors.password} />
                 </div>
-                <a
-                  href="#"
-                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline text-end"
-                >
-                  Forgot your password?
-                </a>
               </Field>
               <Field>
                 <Button type="submit" disabled={isSubmitting} >
-                  {isSubmitting ? "Logging in..." : "Login"}
+                  {isSubmitting ? "Signing up..." : "Sign up"}
                 </Button>
-                {/* <Button variant="outline" type="button">
-                  Login with Google
-                </Button> */}
-
-                <FieldDescription className="text-center cursor-pointer">
-                  Don&apos;t have an account? <Link href={APP_ROUTES.SIGNUP}>Sign up</Link>
-                </FieldDescription>
               </Field>
+              <FieldDescription className="text-center cursor-pointer">
+                Already have an account? <Link href={APP_ROUTES.LOGIN}>Login</Link>
+              </FieldDescription>
             </FieldGroup>
           </form>
         </CardContent>

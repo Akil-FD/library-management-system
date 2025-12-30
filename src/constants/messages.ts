@@ -4,6 +4,8 @@ export const MESSAGES = {
   EMAIL_REQUIRED: "Email is required",
   PASSWORD_MIN_LENGTH: "Password must be at least 6 characters",
   PASSWORD_REQUIRED: "Password is required",
+  EMAIL_EXIST: "Email already Exist",
+  EMAIL_NOT_EXIST: "Email not Exist",
 
   // API messages
   LOGIN_SUCCESS: "Logged in successfully!",

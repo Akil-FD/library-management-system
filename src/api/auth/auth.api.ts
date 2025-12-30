@@ -10,7 +10,24 @@ export const authApi = {
                         token: "fSSlw48yx7Bm5Z9HEiekvmb4ZCJWW9uS97wHVtrd80q2Jp29ZUUIdTFQ5sqSoYYle",
                         role: data.role,
                         email: data.email,
-                        name: "John Doe",
+                        name: data.email.split('@')[0] ?? '',
+                        id: "1",
+                    },
+                    success: true,
+                })
+            }, 1000)
+        })
+    },
+
+    signup(data: LoginPayload): Promise<CommonResType<LoginResponse>> {
+        return new Promise((resolve) => {
+            setTimeout(() => {
+                resolve({
+                    data: {
+                        token: "fSSlw48yx7Bm5Z9HEiekvmb4ZCJWW9uS97wHVtrd80q2Jp29ZUUIdTFQ5sqSoYYle",
+                        role: data.role,
+                        email: data.email,
+                        name: data.email.split('@')[0] ?? '',
                         id: "1",
                     },
                     success: true,

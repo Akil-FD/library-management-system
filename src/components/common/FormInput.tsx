@@ -11,6 +11,7 @@ interface FormInputProps {
   register: UseFormRegister<any>
   error?: FieldError
   required?: boolean
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void
 }
 
 
@@ -22,7 +23,11 @@ export const FormInput = React.memo(({
   register,
   error,
   required,
+  onChange,
 }: FormInputProps) => {
+
+  const inputProps = type === 'file' ? {} : register(name);
+
   return (
     <Field>
       <FieldLabel htmlFor={name}>{label}</FieldLabel>
@@ -31,7 +36,8 @@ export const FormInput = React.memo(({
         id={name}
         type={type}
         placeholder={placeholder}
-        {...register(name)}
+        {...inputProps}
+        onChange={onChange}
         required={required}
       />
 

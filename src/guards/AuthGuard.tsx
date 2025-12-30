@@ -7,7 +7,7 @@ import { useAuth } from "@/hooks/useAuth"
 import { APP_ROUTES } from "@/constants/app"
 import { PageLoader } from "@/components/common/loader"
 
-const AUTH_ROUTES: string[] = [APP_ROUTES.LOGIN]
+const AUTH_ROUTES: string[] = [APP_ROUTES.LOGIN,APP_ROUTES.SIGNUP]
 
 export function AuthGuard({ children }: { children: React.ReactNode }) {
     const { isAuthenticated, isLoading } = useAuth()

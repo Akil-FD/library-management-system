@@ -9,6 +9,7 @@ export const CONFIG = {
 export const APP_ROUTES = {
   HOME: '/',
   LOGIN: '/auth/login',
+  SIGNUP: '/auth/signup',
   DASHBOARD: '/dashboard',
   DASHBOARD_BOOKS: '/dashboard/books',
   DASHBOARD_MY_BOOKS: '/dashboard/my-books',
