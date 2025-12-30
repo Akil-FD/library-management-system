@@ -16,8 +16,6 @@ import {
 } from "@/components/ui/field"
 import { useForm } from "react-hook-form"
 import React, { useEffect } from "react"
-import { yupResolver } from "@hookform/resolvers/yup"
-import * as yup from "yup"
 import { toast } from "sonner"
 import { authApi } from "@/api/auth/auth.api"
 import { FormInput } from "./common/FormInput"
@@ -31,13 +29,25 @@ import Link from "next/link"
 import { showSuccessToast } from "./common/toast"
 import mockData from "../../mock_data/data.json";
 import { User } from "@/types/auth"
+import z from "zod/v3"
+import { zodResolver } from "@hookform/resolvers/zod"
 
+export const loginSchema = z.object({
+  role: z.string().min(1, MESSAGES.ROLE_REQUIRED),
 
-const loginSchema = yup.object().shape({
-  role: yup.string().required(),
-  email: yup.string().email(MESSAGES.INVALID_EMAIL_FORMAT).required(MESSAGES.EMAIL_REQUIRED),
-  password: yup.string().min(6, MESSAGES.PASSWORD_MIN_LENGTH).required(MESSAGES.PASSWORD_REQUIRED),
+  email: z
+    .string()
+    .min(1, MESSAGES.EMAIL_REQUIRED)
+    .email(MESSAGES.INVALID_EMAIL_FORMAT),
+
+  password: z
+    .string()
+    .min(1, MESSAGES.PASSWORD_REQUIRED)
+    .min(6, MESSAGES.PASSWORD_MIN_LENGTH),
 })
+
+export type LoginFormValues = z.infer<typeof loginSchema>
+
 
 
 export function LoginForm({
@@ -51,10 +61,21 @@ export function LoginForm({
 
   const { login } = useAuth();
 
-  const { register, handleSubmit, watch, setValue, setError, formState: { errors, isSubmitting } } = useForm({
-    defaultValues: { role: UserRole.USER, email: "", password: "" },
-    resolver: yupResolver(loginSchema),
-    mode: 'onSubmit'
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormValues>({
+    defaultValues: {
+      role: UserRole.USER,
+      email: "",
+      password: "",
+    },
+    resolver: zodResolver(loginSchema),
+    mode: "onSubmit",
   })
 
   const formValues = watch();

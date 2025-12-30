@@ -15,14 +15,12 @@ import {
   FieldGroup,
 } from "@/components/ui/field"
 import { useForm } from "react-hook-form"
-import React, { useEffect } from "react"
-import { yupResolver } from "@hookform/resolvers/yup"
-import * as yup from "yup"
+import React from "react"
+
 import { toast } from "sonner"
 import { authApi } from "@/api/auth/auth.api"
 import { FormInput } from "./common/FormInput"
 import { MESSAGES } from "@/constants/messages"
-import { Tabs, TabsList, TabsTrigger } from "./ui/tabs"
 import { UserRole } from "@/types/enums/auth.enum"
 import { APP_ROUTES, CONFIG, LOCAL_STORAGE_KEYS } from "@/constants/app"
 import { useAuth } from "@/hooks/useAuth"
@@ -32,13 +30,26 @@ import { showSuccessToast } from "./common/toast"
 import mockData from "../../mock_data/data.json";
 import { User } from "@/types/auth"
 import Link from "next/link"
+import z from "zod/v3"
+import { zodResolver } from "@hookform/resolvers/zod"
 
 
-const signupSchema = yup.object().shape({
-  role: yup.string().required(),
-  email: yup.string().email(MESSAGES.INVALID_EMAIL_FORMAT).required(MESSAGES.EMAIL_REQUIRED),
-  password: yup.string().min(6, MESSAGES.PASSWORD_MIN_LENGTH).required(MESSAGES.PASSWORD_REQUIRED),
+export const signupSchema = z.object({
+  role: z.string().min(1, MESSAGES.ROLE_REQUIRED),
+
+  email: z
+    .string()
+    .min(1, MESSAGES.EMAIL_REQUIRED)
+    .email(MESSAGES.INVALID_EMAIL_FORMAT),
+
+  password: z
+    .string()
+    .min(1, MESSAGES.PASSWORD_REQUIRED)
+    .min(6, MESSAGES.PASSWORD_MIN_LENGTH),
 })
+
+export type SignupFormValues = z.infer<typeof signupSchema>
+
 
 
 export function SignupForm({
@@ -49,11 +60,21 @@ export function SignupForm({
   const { login } = useAuth();
   const router = useRouter();
 
-  const { register, handleSubmit, setError, formState: { errors, isSubmitting } } = useForm({
-    defaultValues: { role: UserRole.USER, email: "", password: "" },
-    resolver: yupResolver(signupSchema),
-    mode: 'onSubmit'
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormValues>({
+    defaultValues: {
+      role: UserRole.USER,
+      email: "",
+      password: "",
+    },
+    resolver: zodResolver(signupSchema),
+    mode: "onSubmit",
   })
+
 
   const onSubmit = async (data: {
     role: string

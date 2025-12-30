@@ -6,6 +6,7 @@ export const MESSAGES = {
   PASSWORD_REQUIRED: "Password is required",
   EMAIL_EXIST: "Email already Exist",
   EMAIL_NOT_EXIST: "Email not Exist",
+  ROLE_REQUIRED:"Role is required",
 
   // API messages
   LOGIN_SUCCESS: "Logged in successfully!",
