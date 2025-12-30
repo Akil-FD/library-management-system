@@ -12,12 +12,15 @@ export const APP_ROUTES = {
   DASHBOARD: '/dashboard',
   DASHBOARD_BOOKS: '/dashboard/books',
   DASHBOARD_MY_BOOKS: '/dashboard/my-books',
+  DASHBOARD_ACTIVITY_LOGS: '/dashboard/activity-logs',
 } as const
 
 export const LOCAL_STORAGE_KEYS = {
   USER: 'user',
   BOOKS: 'books',
   BORROWED_BOOKS: 'borrowedBooks',
+  USERS_BOOKS_LOG: 'usersBooksLog',
+  LOGGEDIN_USERS: 'loggedInUsers'
 } as const
 
 export const DEFAULT_VALUES = {
@@ -33,6 +36,10 @@ export const MENU_ITEMS = [
   {
     title: "My Books",
     url: APP_ROUTES.DASHBOARD_MY_BOOKS,
+  },
+  {
+    title: "Activity Logs",
+    url: APP_ROUTES.DASHBOARD_ACTIVITY_LOGS,
   },
 ] as const
 

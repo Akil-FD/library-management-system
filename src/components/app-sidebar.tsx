@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import {
+  IconArrowUpRight,
   IconDashboard,
   IconInnerShadowTop,
   IconListDetails,
@@ -21,30 +22,46 @@ import {
 import { FieldSeparator } from "./ui/field"
 import InfoCard from "@/app/(protected)/dashboard/components/info-card"
 import { useAuth } from "@/hooks/useAuth"
-import { MENU_ITEMS } from "@/constants/app"
-
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-  },
-  navMain: [
-    {
-      title: MENU_ITEMS[0].title,
-      url: MENU_ITEMS[0].url,
-      icon: IconDashboard,
-    },
-    {
-      title: MENU_ITEMS[1].title,
-      url: MENU_ITEMS[1].url,
-      icon: IconListDetails,
-    },
-
-  ],
-}
+import { DEFAULT_VALUES, MENU_ITEMS } from "@/constants/app"
+import { UserRole } from "@/types/enums/auth.enum"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  const { borrowedBooks } = useAuth();
+  const { user, borrowedBooks } = useAuth();
+
+  const data = {
+    user: {
+      name: (user?.name || user?.role || "User")
+        .trim()
+        .replace(/\b\w/g, (c) => c.toUpperCase()),
+      email: user?.email ?? '',
+    },
+    navMain: user?.role === UserRole.ADMIN ?
+      [
+        {
+          title: MENU_ITEMS[0].title,
+          url: MENU_ITEMS[0].url,
+          icon: IconDashboard,
+        },
+        {
+          title: MENU_ITEMS[2].title,
+          url: MENU_ITEMS[2].url,
+          icon: IconArrowUpRight,
+        },
+
+      ]
+      : [
+        {
+          title: MENU_ITEMS[0].title,
+          url: MENU_ITEMS[0].url,
+          icon: IconDashboard,
+        },
+        {
+          title: MENU_ITEMS[1].title,
+          url: MENU_ITEMS[1].url,
+          icon: IconListDetails,
+        },
+      ],
+  }
 
   return (
     <Sidebar collapsible="offcanvas" {...props}>
@@ -57,7 +74,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">Shelf Wise</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
@@ -70,7 +87,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavMain items={data.navMain} />
       </SidebarContent>
       <SidebarFooter>
-        <InfoCard limit={2} used={borrowedBooks.length} className="mx-2 mb-3 mt-2 py-3" />
+        {user?.role === UserRole.USER && <InfoCard limit={DEFAULT_VALUES.BORROW_BOOKS_LIMIT} used={borrowedBooks.length} className="mx-2 mb-3 mt-2 py-3" />}
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>

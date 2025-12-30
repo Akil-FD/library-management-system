@@ -4,20 +4,23 @@ import { Button } from "@/components/ui/button";
 import { Card, CardDescription, CardTitle } from "@/components/ui/card";
 import { DEFAULT_VALUES, MENU_ITEMS } from "@/constants/app";
 import { useAuth } from "@/hooks/useAuth";
-import { BorrowedBook } from "@/types/dashboard";
+import { Book, BorrowedBook } from "@/types/dashboard";
+import { Minus, Plus } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useCallback, useMemo, useState } from "react";
 
 
 interface BookCardProps {
-    book: BorrowedBook;
-    onBorrow?: (details: BorrowedBook) => void;
-    onReturn?: (details: BorrowedBook) => void;
+    book: BorrowedBook | Book;
+    isAdmin?: boolean;
+    onBorrow?: (details: BorrowedBook | Book) => void;
+    onReturn?: (details: BorrowedBook | Book) => void;
+    onStockUpdate?: (details: BorrowedBook | Book, processName: 'increase' | 'decrease') => void;
 }
 
 
-export default function BookCard({ book, onBorrow, onReturn }: BookCardProps) {
+export default function BookCard({ book, isAdmin = false, onBorrow, onReturn, onStockUpdate }: BookCardProps) {
     const [imgError, setImgError] = useState(false);
     const { borrowedBooks } = useAuth();
     const pathname = usePathname();
@@ -78,11 +81,11 @@ export default function BookCard({ book, onBorrow, onReturn }: BookCardProps) {
                         {book.author}
                     </p>
 
-                    {memoized.isMyBooksPage &&
+                    {memoized.isMyBooksPage && 'borrowedDate' in book &&
                         <p className="text-xs text-muted-foreground">
                             Borrowed on{" "}
                             <span className="font-medium">
-                                {new Date(book.borrowedDate).toLocaleDateString()}
+                                {new Date(book.borrowedDate as string).toLocaleDateString()}
                             </span>
                         </p>
                     }
@@ -113,7 +116,7 @@ export default function BookCard({ book, onBorrow, onReturn }: BookCardProps) {
                         />
                     }
 
-                    {memoized.isBooksPage &&
+                    {memoized.isBooksPage && !isAdmin &&
                         <BorrowButton
                             className={book.inStock > 0
                                 ? "bg-foreground text-background hover:bg-foreground/90"
@@ -123,6 +126,33 @@ export default function BookCard({ book, onBorrow, onReturn }: BookCardProps) {
                             disabled={book.isBorrowed || book.inStock === 0}
                             onClick={handleBorrow}
                         />
+                    }
+
+                    {memoized.isBooksPage && isAdmin &&
+                        <div className="flex items-center gap-3 rounded-full px-2 py-1 ml-auto">
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 rounded-full bg-foreground text-background hover:bg-foreground/90 shadow-sm"
+                                onClick={() => onStockUpdate?.(book, 'decrease')}
+                                disabled={book.inStock <= 0}
+                            >
+                                <Minus className="h-4 w-4 text-white" />
+                            </Button>
+
+                            <span className="min-w-[24px] text-center text-sm font-medium">
+                                {book.inStock}
+                            </span>
+
+                            <Button
+                                size="icon"
+                                variant="ghost"
+                                className="h-8 w-8 rounded-full bg-foreground text-background hover:bg-foreground/90 shadow-sm"
+                                onClick={() => onStockUpdate?.(book, 'increase')}
+                            >
+                                <Plus className="h-4 w-4 text-white" />
+                            </Button>
+                        </div>
                     }
                 </div>
             </div>
