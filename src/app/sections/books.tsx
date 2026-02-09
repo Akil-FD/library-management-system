@@ -15,9 +15,9 @@ export default function Books({ data }: { data: Book[] }) {
     const { user, borrowedBooks, updateBorrowedBooks } = useAuth();
 
     useEffect(() => {
-        const storeDataBooks = localStorage.getItem(LOCAL_STORAGE_KEYS.BOOKS);
-         const parsedStoreDataBooks = storeDataBooks? JSON.parse(storeDataBooks): '';
-        const storedBorrowedBooks = localStorage.getItem(LOCAL_STORAGE_KEYS.BORROWED_BOOKS + `_${user?.name}`)
+        const storeDataBooks = localStorage.getItem(LOCAL_STORAGE_KEYS.BOOKS) || "[]";
+        const parsedStoreDataBooks = JSON.parse(storeDataBooks);
+        const storedBorrowedBooks = localStorage.getItem(LOCAL_STORAGE_KEYS.BORROWED_BOOKS + `_${user?.name}`) || "[]"
         if (parsedStoreDataBooks || storedBorrowedBooks) {
             const parsedBooks = parsedStoreDataBooks && parsedStoreDataBooks.length > 0 ? parsedStoreDataBooks.map((book: Book) => {
                 const borrowedBook = storedBorrowedBooks ?
@@ -52,8 +52,8 @@ export default function Books({ data }: { data: Book[] }) {
     }, [data]);
 
     const handleBorrow = (bookDetails: BorrowedBook | Book) => {
-        const storedUsersHistory = localStorage.getItem(LOCAL_STORAGE_KEYS.USERS_BOOKS_LOG);
-        const parsedUsersHistory: BorrowedBook[] = storedUsersHistory ? JSON.parse(storedUsersHistory) : [];
+        const storedUsersHistory = localStorage.getItem(LOCAL_STORAGE_KEYS.USERS_BOOKS_LOG) || "[]";
+        const parsedUsersHistory: BorrowedBook[] = JSON.parse(storedUsersHistory);
 
         const book = booksState.find(b => b.title === bookDetails.title);
 
