@@ -16,9 +16,10 @@ export default function Books({ data }: { data: Book[] }) {
 
     useEffect(() => {
         const storeDataBooks = localStorage.getItem(LOCAL_STORAGE_KEYS.BOOKS);
+        const parsedStoreDataBooks = JSON.parse(storeDataBooks??'');
         const storedBorrowedBooks = localStorage.getItem(LOCAL_STORAGE_KEYS.BORROWED_BOOKS + `_${user?.name}`)
-        if (storeDataBooks || storedBorrowedBooks) {
-            const parsedBooks = storeDataBooks ? JSON.parse(storeDataBooks).map((book: Book) => {
+        if (parsedStoreDataBooks || storedBorrowedBooks) {
+            const parsedBooks = parsedStoreDataBooks && parsedStoreDataBooks.length > 0 ? parsedStoreDataBooks.map((book: Book) => {
                 const borrowedBook = storedBorrowedBooks ?
                     JSON.parse(storedBorrowedBooks).find((borrowedBook: BorrowedBook) => borrowedBook.title === book.title) : null;
                 return {
